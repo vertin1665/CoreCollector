@@ -97,5 +97,45 @@ public:
 
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+protected:
+	//设置游戏开始
+	virtual void BeginPlay() override;
+	//设置玩家输入组件
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//新建的输入资产变量
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Input)
+	UInputMappingContext* DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Input)
+	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Input)
+	UInputAction* LookAction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Input)
+	UInputAction* JumpAction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Input)
+	UIputAction* SprintAction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Input)
+	UInputAction* InteractAction;
+
+	//移动和视角的函数
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+
+	//冲刺和交互的函数
+	void StartSprint();
+	void StopSprint();
+	void Interact();
+
+	//速度控制
+	UPROPERTY(EditAnywhere,Category="Movement")
+	float SprintSpeed = 1200.0f;
+	float DefaultSpeed = 600.0f;
+
 };
 

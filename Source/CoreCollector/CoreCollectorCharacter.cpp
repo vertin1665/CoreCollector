@@ -7,10 +7,13 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Controller.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"//输入组件
+#include "EnhancedInputSubsystems.h"//输入子系统
+#include "InputActionValue.h"//输入值结构体
 #include "CoreCollector.h"
+
+
+
 
 ACoreCollectorCharacter::ACoreCollectorCharacter()
 {
@@ -130,4 +133,54 @@ void ACoreCollectorCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+//游戏初始化
+void ACoreCollectorCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext,0);
+		}
+	}
+
+	//记录初始速度
+	if (GetCharacterMovement())
+	{
+		DefaultSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	}
+}
+
+//设置玩家按键
+void ACoreCollectorCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		//绑定移动和视角
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACoreCollectorCharacter::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACoreCollectorCharacter::Look);
+
+		//绑定跳跃
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		//绑定冲刺
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACoreCollectorCharacter::StartSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACoreCollectorCharacter::StopSprint);
+
+		//绑定交互
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ACoreCollectorCharacter::Interact);
+	}
+}
+
+//移动函数
+void ACoreCollectorCharacter::Move(const FInputActionValue& Value)
+{
+	FVector2D MovementVector =
 }
